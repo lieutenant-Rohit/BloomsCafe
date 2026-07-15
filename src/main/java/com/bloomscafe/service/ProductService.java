@@ -53,6 +53,23 @@ public class ProductService {
         productRepository.delete(existingProduct);
     }
 
+    public Product updateProduct(Long id, Product productDetails) {
+        Product existingProduct = getProductById(id); // Re-uses method #3 to check if it exists
+
+        existingProduct.setName(productDetails.getName());
+        existingProduct.setPrice(productDetails.getPrice());
+        existingProduct.setStockQuantity(productDetails.getStockQuantity());
+
+        // If the admin is moving this product to a different category, verify the new one exists
+        if (productDetails.getCategory() != null && productDetails.getCategory().getId() != null) {
+            Category newCategory = categoryRepository.findById(productDetails.getCategory().getId())
+                    .orElseThrow(() -> new RuntimeException("Cannot update. New Category not found."));
+            existingProduct.setCategory(newCategory);
+        }
+
+        return productRepository.save(existingProduct);
+    }
+
 
 
 }
