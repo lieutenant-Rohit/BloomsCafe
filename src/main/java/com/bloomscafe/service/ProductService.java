@@ -4,9 +4,10 @@ import com.bloomscafe.entity.Category;
 import com.bloomscafe.entity.Product;
 import com.bloomscafe.repository.CategoryRepository;
 import com.bloomscafe.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ProductService {
@@ -20,14 +21,16 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
-    //Fetch All Products
-    public List<Product> getAllProduct(){
-        return productRepository.findAll();
+    //Fetch All Products (Paginated)
+    public Page<Product> getAllProducts(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findAll(pageable);
     }
 
-    //Fetch Product from a Specific Category
-    public List<Product> getProductsByCategory(Long categoryId){
-        return productRepository.findByCategoryId(categoryId);
+    //Fetch Product from a Specific Category (Paginated)
+    public Page<Product> getProductsByCategory(Long categoryId, int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findByCategoryId(categoryId, pageable);
     }
 
     //Find a Specific Product By its ID
@@ -53,6 +56,7 @@ public class ProductService {
         productRepository.delete(existingProduct);
     }
 
+    //Update an existing Product
     public Product updateProduct(Long id, Product productDetails) {
         Product existingProduct = getProductById(id); // Re-uses method #3 to check if it exists
 
@@ -69,7 +73,5 @@ public class ProductService {
 
         return productRepository.save(existingProduct);
     }
-
-
 
 }

@@ -2,9 +2,10 @@ package com.bloomscafe.service;
 
 import com.bloomscafe.entity.Category;
 import com.bloomscafe.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class CategoryService {
@@ -15,9 +16,10 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    //Fetch All Categories
-    public List<Category> getAllCategories(){
-        return categoryRepository.findAll();
+    //Fetch All Categories (Now with Pagination!)
+    public Page<Category> getAllCategories(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return categoryRepository.findAll(pageable);
     }
 
     //Create a New Category
