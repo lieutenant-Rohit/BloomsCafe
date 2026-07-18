@@ -1,18 +1,22 @@
 package com.bloomscafe.service;
 
 import com.bloomscafe.entity.User;
+import com.bloomscafe.exception.ResourceNotFoundException;
 import com.bloomscafe.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // 1. Fetch All Users (Paginated)
@@ -23,7 +27,7 @@ public class UserService {
     // 2. Find User by ID
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User Not Found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User Not Found with ID: " + id));
     }
 
     // 3. Create a New User
@@ -37,7 +41,7 @@ public class UserService {
 
         existingUser.setName(userDetails.getName());
         existingUser.setEmail(userDetails.getEmail());
-        existingUser.setPassword(userDetails.getPassword());
+        existingUser.setPassword(passwordEncoder.encode(userDetails.getPassword()));
         existingUser.setAddress(userDetails.getAddress());
         existingUser.setRole(userDetails.getRole());
 

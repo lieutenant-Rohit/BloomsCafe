@@ -1,6 +1,7 @@
 package com.bloomscafe.service;
 
 import com.bloomscafe.entity.Category;
+import com.bloomscafe.exception.ResourceNotFoundException;
 import com.bloomscafe.repository.CategoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,12 +31,12 @@ public class CategoryService {
     //Find Category by ID
     public Category getCategoryById(Long id)
     {
-        return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category Not Found with ID: "+ id));
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category Not Found with ID: "+ id));
     }
 
     public Category updateCategory(Long id, Category categoryDetails){
         Category existingCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category Not Found with ID: "+ id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category Not Found with ID: "+ id));
 
         existingCategory.setName(categoryDetails.getName());
 
@@ -44,7 +45,7 @@ public class CategoryService {
 
     public void deleteCategory(Long id){
         Category existingCategory = categoryRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Category Not Found with ID: "+ id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category Not Found with ID: "+ id));
 
         categoryRepository.delete(existingCategory);
     }

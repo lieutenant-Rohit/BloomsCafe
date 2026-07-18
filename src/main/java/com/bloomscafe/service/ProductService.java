@@ -2,6 +2,7 @@ package com.bloomscafe.service;
 
 import com.bloomscafe.entity.Category;
 import com.bloomscafe.entity.Product;
+import com.bloomscafe.exception.ResourceNotFoundException;
 import com.bloomscafe.repository.CategoryRepository;
 import com.bloomscafe.repository.ProductRepository;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,7 @@ public class ProductService {
     //Find a Specific Product By its ID
     public Product getProductById(Long id){
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product Not Found with ID: "+ id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product Not Found with ID: "+ id));
     }
 
     //Create a New Product
@@ -44,7 +45,7 @@ public class ProductService {
         Long categoryId = product.getCategory().getId();
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Cannot create product. Category Not Found with ID: "+ categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot create product. Category Not Found with ID: "+ categoryId));
 
         product.setCategory(category);
         return productRepository.save(product);
@@ -63,11 +64,12 @@ public class ProductService {
         existingProduct.setName(productDetails.getName());
         existingProduct.setPrice(productDetails.getPrice());
         existingProduct.setStockQuantity(productDetails.getStockQuantity());
+        existingProduct.setImageUrl(productDetails.getImageUrl());
 
         // If the admin is moving this product to a different category, verify the new one exists
         if (productDetails.getCategory() != null && productDetails.getCategory().getId() != null) {
             Category newCategory = categoryRepository.findById(productDetails.getCategory().getId())
-                    .orElseThrow(() -> new RuntimeException("Cannot update. New Category not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cannot update. New Category not found."));
             existingProduct.setCategory(newCategory);
         }
 

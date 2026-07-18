@@ -22,10 +22,11 @@ public class OrderController {
 
     // 1. Submit a New Order (For Logged In Customers)
     @PostMapping
-    public ResponseEntity<Order> placeOrder(Authentication authentication, @RequestBody OrderRequest request) {
-        // authentication.getName() automatically extracts the email from the JWT!
+    public ResponseEntity<Order> placeOrder(Authentication authentication, @RequestBody(required = false) OrderRequest request) {
         String userEmail = authentication.getName();
-        Order newOrder = orderService.placeOrder(userEmail, request);
+        Order newOrder = request != null
+                ? orderService.placeOrder(userEmail, request)
+                : orderService.placeOrderFromCart(userEmail);
         return ResponseEntity.ok(newOrder);
     }
 

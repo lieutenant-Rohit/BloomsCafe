@@ -2,18 +2,32 @@ package com.bloomscafe.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    // Secret Key
-    private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${jwt.secret:#{null}}")
+    private String secret;
+
+    private Key secretKey;
+
+    @PostConstruct
+    public void init() {
+        if (secret != null && !secret.isBlank()) {
+            byte[] keyBytes = Base64.getDecoder().decode(secret);
+            secretKey = Keys.hmacShaKeyFor(keyBytes);
+        } else {
+            secretKey = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+        }
+    }
 
     // Token validity (24 hours)
     private final long jwtExpiration = 1000 * 60 * 60 * 24;

@@ -4,6 +4,7 @@ import com.bloomscafe.dto.AuthenticationRequest;
 import com.bloomscafe.dto.AuthenticationResponse;
 import com.bloomscafe.dto.RegisterRequest;
 import com.bloomscafe.entity.User;
+import com.bloomscafe.exception.ResourceNotFoundException;
 import com.bloomscafe.repository.UserRepository;
 import com.bloomscafe.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -52,7 +53,7 @@ public class AuthService {
 
         // 2. If the above line didn't throw an error, the user is authenticated! Find them in the DB.
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // 3. Generate and return the token
         String jwtToken = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
