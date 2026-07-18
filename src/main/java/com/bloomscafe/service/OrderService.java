@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -52,9 +56,18 @@ public class OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
+        Set<Long> productIds = request.getOrderItems().stream()
+                .map(OrderItemRequest::getProductId)
+                .collect(Collectors.toSet());
+        Map<Long, Product> productMap = productRepository.findAllById(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
         for (OrderItemRequest itemRequest : request.getOrderItems()) {
-            Product product = productRepository.findById(itemRequest.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemRequest.getProductId()));
+            Product product = productMap.get(itemRequest.getProductId());
+            if (product == null) {
+                throw new ResourceNotFoundException("Product not found: " + itemRequest.getProductId());
+            }
 
             if (product.getStockQuantity() < itemRequest.getQuantity()) {
                 throw new InsufficientStockException(
