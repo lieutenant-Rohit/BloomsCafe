@@ -6,7 +6,6 @@ import com.bloomscafe.exception.ResourceNotFoundException;
 import com.bloomscafe.repository.CategoryRepository;
 import com.bloomscafe.repository.ProductRepository;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +40,6 @@ public class ProductService {
 
     //Find a Specific Product By its ID
     @Transactional(readOnly = true)
-    @Cacheable(value = "products", key = "#id")
     public Product getProductById(Long id){
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product Not Found with ID: "+ id));
