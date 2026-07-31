@@ -22,7 +22,6 @@ public class CategoryService {
 
     //Fetch All Categories (Now with Pagination!)
     @Transactional(readOnly = true)
-    @Cacheable(value = "categories", key = "'all_' + #page + '_' + #size")
     public Page<Category> getAllCategories(int page, int size){
         Pageable pageable = PageRequest.of(page, size);
         return categoryRepository.findAll(pageable);

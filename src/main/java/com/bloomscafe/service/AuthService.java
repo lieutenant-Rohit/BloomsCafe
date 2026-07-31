@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -27,6 +28,7 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
+    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
         // 1. Create a new User entity and hash the password!
         User user = new User();
@@ -45,6 +47,7 @@ public class AuthService {
         return new AuthenticationResponse(jwtToken);
     }
 
+    @Transactional(readOnly = true)
     public AuthenticationResponse login(AuthenticationRequest request) {
         // 1. This method talks to our CustomUserDetailsService behind the scenes to verify the password
         authenticationManager.authenticate(
