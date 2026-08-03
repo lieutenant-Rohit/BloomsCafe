@@ -48,6 +48,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
+                        .requestMatchers("/actuator/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
 

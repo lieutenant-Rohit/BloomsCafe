@@ -15,9 +15,14 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class
 DataSeeder implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -33,11 +38,16 @@ DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.info("DataSeeder started. User count: {}", userRepository.count());
         if (userRepository.count() == 0) {
+            log.info("No users found, seeding 10000 users...");
             seedUsers();
             seedCategories();
+            log.info("Seeding complete. User count: {}", userRepository.count());
         } else {
+            log.info("Users already exist, running updates...");
             updateProductImages();
+            resetStock();
         }
     }
 
@@ -76,6 +86,8 @@ DataSeeder implements CommandLineRunner {
     }
 
     private void seedUsers() {
+        String hash = passwordEncoder.encode("customer123");
+
         User admin = new User();
         admin.setName("Admin");
         admin.setEmail("admin@bloomscafe.com");
@@ -90,14 +102,22 @@ DataSeeder implements CommandLineRunner {
         staff.setAddress("456 Staff Ave");
         staff.setRole(Role.STAFF);
 
-        User customer = new User();
-        customer.setName("John Doe");
-        customer.setEmail("john@example.com");
-        customer.setPassword(passwordEncoder.encode("customer123"));
-        customer.setAddress("789 Customer Rd");
-        customer.setRole(Role.CUSTOMER);
+        List<User> customers = new java.util.ArrayList<>();
+            for (int i = 1; i <= 5000; i++) {
+                User customer = new User();
+                customer.setName("Customer " + i);
+                customer.setEmail("customer" + i + "@example.com");
+                customer.setPassword(hash);
+                customer.setAddress(i + " Customer Rd");
+                customer.setRole(Role.CUSTOMER);
+                customers.add(customer);
+            }
 
-        userRepository.saveAll(List.of(admin, staff, customer));
+        List<User> all = new java.util.ArrayList<>();
+        all.add(admin);
+        all.add(staff);
+        all.addAll(customers);
+        userRepository.saveAll(all);
     }
 
     private void seedCategories() {
@@ -123,33 +143,40 @@ DataSeeder implements CommandLineRunner {
 
     private void seedProducts(Category coffee, Category pastries, Category cakes, Category tea, Category sandwiches) {
         List<Product> products = List.of(
-                createProduct("Espresso", new BigDecimal("3.50"), 100, coffee, "/images/products/espresso.jpg"),
-                createProduct("Latte", new BigDecimal("4.50"), 80, coffee, "/images/products/latte.jpg"),
-                createProduct("Cappuccino", new BigDecimal("4.00"), 75, coffee, "/images/products/cappuccino.jpg"),
-                createProduct("Mocha", new BigDecimal("5.00"), 60, coffee, "/images/products/mocha.jpg"),
-                createProduct("Cold Brew", new BigDecimal("4.75"), 50, coffee, "/images/products/cold-brew.jpg"),
+                createProduct("Espresso", new BigDecimal("3.50"), 100000, coffee, "/images/products/espresso.jpg"),
+                createProduct("Latte", new BigDecimal("4.50"), 100000, coffee, "/images/products/latte.jpg"),
+                createProduct("Cappuccino", new BigDecimal("4.00"), 100000, coffee, "/images/products/cappuccino.jpg"),
+                createProduct("Mocha", new BigDecimal("5.00"), 100000, coffee, "/images/products/mocha.jpg"),
+                createProduct("Cold Brew", new BigDecimal("4.75"), 100000, coffee, "/images/products/cold-brew.jpg"),
 
-                createProduct("Croissant", new BigDecimal("3.00"), 40, pastries, "/images/products/croissant.jpg"),
-                createProduct("Blueberry Muffin", new BigDecimal("3.50"), 35, pastries, "/images/products/blueberry-muffin.jpg"),
-                createProduct("Cinnamon Roll", new BigDecimal("4.00"), 30, pastries, "/images/products/cinnamon-roll.jpg"),
-                createProduct("Scone", new BigDecimal("3.25"), 25, pastries, "/images/products/scone.jpg"),
+                createProduct("Croissant", new BigDecimal("3.00"), 100000, pastries, "/images/products/croissant.jpg"),
+                createProduct("Blueberry Muffin", new BigDecimal("3.50"), 100000, pastries, "/images/products/blueberry-muffin.jpg"),
+                createProduct("Cinnamon Roll", new BigDecimal("4.00"), 100000, pastries, "/images/products/cinnamon-roll.jpg"),
+                createProduct("Scone", new BigDecimal("3.25"), 100000, pastries, "/images/products/scone.jpg"),
 
-                createProduct("Chocolate Cake", new BigDecimal("6.00"), 20, cakes, "/images/products/chocolate-cake.jpg"),
-                createProduct("Cheesecake", new BigDecimal("6.50"), 15, cakes, "/images/products/cheesecake.jpg"),
-                createProduct("Carrot Cake", new BigDecimal("5.50"), 18, cakes, "/images/products/carrot-cake.jpg"),
-                createProduct("Tiramisu", new BigDecimal("7.00"), 12, cakes, "/images/products/tiramisu.jpg"),
+                createProduct("Chocolate Cake", new BigDecimal("6.00"), 100000, cakes, "/images/products/chocolate-cake.jpg"),
+                createProduct("Cheesecake", new BigDecimal("6.50"), 100000, cakes, "/images/products/cheesecake.jpg"),
+                createProduct("Carrot Cake", new BigDecimal("5.50"), 100000, cakes, "/images/products/carrot-cake.jpg"),
+                createProduct("Tiramisu", new BigDecimal("7.00"), 100000, cakes, "/images/products/tiramisu.jpg"),
 
-                createProduct("Earl Grey", new BigDecimal("3.00"), 60, tea, "/images/products/earl-grey.jpg"),
-                createProduct("Green Tea", new BigDecimal("3.00"), 55, tea, "/images/products/green-tea.jpg"),
-                createProduct("Chai Latte", new BigDecimal("4.25"), 45, tea, "/images/products/chai-latte.jpg"),
-                createProduct("Matcha Latte", new BigDecimal("5.00"), 40, tea, "/images/products/matcha-latte.jpg"),
+                createProduct("Earl Grey", new BigDecimal("3.00"), 100000, tea, "/images/products/earl-grey.jpg"),
+                createProduct("Green Tea", new BigDecimal("3.00"), 100000, tea, "/images/products/green-tea.jpg"),
+                createProduct("Chai Latte", new BigDecimal("4.25"), 100000, tea, "/images/products/chai-latte.jpg"),
+                createProduct("Matcha Latte", new BigDecimal("5.00"), 100000, tea, "/images/products/matcha-latte.jpg"),
 
-                createProduct("Grilled Cheese", new BigDecimal("6.50"), 25, sandwiches, "/images/products/grilled-cheese.jpg"),
-                createProduct("Turkey Club", new BigDecimal("7.50"), 20, sandwiches, "/images/products/turkey-club.jpg"),
-                createProduct("Veggie Wrap", new BigDecimal("6.00"), 22, sandwiches, "/images/products/veggie-wrap.jpg")
+                createProduct("Grilled Cheese", new BigDecimal("6.50"), 100000, sandwiches, "/images/products/grilled-cheese.jpg"),
+                createProduct("Turkey Club", new BigDecimal("7.50"), 100000, sandwiches, "/images/products/turkey-club.jpg"),
+                createProduct("Veggie Wrap", new BigDecimal("6.00"), 100000, sandwiches, "/images/products/veggie-wrap.jpg")
         );
 
         productRepository.saveAll(products);
+    }
+
+    private void resetStock() {
+        for (Product product : productRepository.findAll()) {
+            product.setStockQuantity(100000);
+            productRepository.save(product);
+        }
     }
 
     private Product createProduct(String name, BigDecimal price, int stock, Category category, String imageUrl) {
