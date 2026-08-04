@@ -5,6 +5,7 @@ import com.bloomscafe.exception.ResourceNotFoundException;
 import com.bloomscafe.repository.CategoryRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,10 @@ public class CategoryService {
 
     //Create a New Category
     @Transactional
-    @CacheEvict(value = "categories", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "categories", allEntries = true),
+            @CacheEvict(value = "products", allEntries = true)
+    })
     public Category createCategory(Category category){
         return categoryRepository.save(category);
     }
@@ -43,7 +47,10 @@ public class CategoryService {
     }
 
     @Transactional
-    @CacheEvict(value = "categories", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "categories", allEntries = true),
+            @CacheEvict(value = "products", allEntries = true)
+    })
     public Category updateCategory(Long id, Category categoryDetails){
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category Not Found with ID: "+ id));
@@ -54,7 +61,10 @@ public class CategoryService {
     }
 
     @Transactional
-    @CacheEvict(value = "categories", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "categories", allEntries = true),
+            @CacheEvict(value = "products", allEntries = true)
+    })
     public void deleteCategory(Long id){
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category Not Found with ID: "+ id));

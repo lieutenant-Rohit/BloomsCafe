@@ -1,17 +1,20 @@
 JAVA_HOME := /Users/root1/Library/Java/JavaVirtualMachines/temurin-21.0.11/Contents/Home
 
-.PHONY: run3 stop
+.PHONY: build run stop
 
-run3:
-	-lsof -ti tcp:8080 -ti tcp:8081 -ti tcp:8082 -ti tcp:8083 | xargs kill -9
-	ln -sf $(PWD)/config/nginx-bloomscafe.conf /opt/homebrew/etc/nginx/servers/bloomscafe.conf
-	-nginx -s quit 2>/dev/null; nginx
-	nohup $(JAVA_HOME)/bin/java -jar target/BloomsCafe-0.0.1-SNAPSHOT.jar --server.port=8081 > /tmp/blooms-8081.log 2>&1 &
-	nohup $(JAVA_HOME)/bin/java -jar target/BloomsCafe-0.0.1-SNAPSHOT.jar --server.port=8082 > /tmp/blooms-8082.log 2>&1 &
-	nohup $(JAVA_HOME)/bin/java -jar target/BloomsCafe-0.0.1-SNAPSHOT.jar --server.port=8083 > /tmp/blooms-8083.log 2>&1 &
+build:
+	npm --prefix frontend run build
+	rm -rf src/main/resources/static
+	mkdir -p src/main/resources/static
+	cp -r frontend/dist/* src/main/resources/static/
+	./mvnw -q -DskipTests package
+
+run: build
+	-lsof -ti tcp:8080 | xargs kill -9
+	nohup $(JAVA_HOME)/bin/java -jar target/BloomsCafe-0.0.1-SNAPSHOT.jar > /tmp/blooms-8080.log 2>&1 &
 	@sleep 8
-	@echo "3 instances started on ports 8081, 8082, 8083"
+	@echo "Single instance started on port 8080 (API + frontend)"
 
 stop:
-	-lsof -ti tcp:8080 -ti tcp:8081 -ti tcp:8082 -ti tcp:8083 | xargs kill -9
+	-lsof -ti tcp:8080 | xargs kill -9
 	@echo "Stopped"

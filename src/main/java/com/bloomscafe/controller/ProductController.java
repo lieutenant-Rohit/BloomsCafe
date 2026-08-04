@@ -1,8 +1,8 @@
 package com.bloomscafe.controller;
 
+import com.bloomscafe.dto.ProductPageResponse;
 import com.bloomscafe.entity.Product;
 import com.bloomscafe.service.ProductService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ public class ProductController {
 
     // 1. GET: http://localhost:8080/api/products?page=0&size=10
     @GetMapping
-    public Page<Product> getAllProducts(
+    public ProductPageResponse getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return productService.getAllProducts(page, size);
@@ -27,7 +27,7 @@ public class ProductController {
 
     // 2. GET: http://localhost:8080/api/products/category/1?page=0&size=10
     @GetMapping("/category/{categoryId}")
-    public Page<Product> getProductsByCategory(
+    public ProductPageResponse getProductsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

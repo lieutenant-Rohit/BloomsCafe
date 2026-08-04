@@ -59,7 +59,7 @@ public class OrderService {
         Set<Long> productIds = request.getOrderItems().stream()
                 .map(OrderItemRequest::getProductId)
                 .collect(Collectors.toSet());
-        Map<Long, Product> productMap = productRepository.findAllById(productIds)
+        Map<Long, Product> productMap = productRepository.findAllByIdForUpdate(productIds)
                 .stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
 
@@ -117,8 +117,18 @@ public class OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
+        Set<Long> productIds = cartItems.stream()
+                .map(cartItem -> cartItem.getProduct().getId())
+                .collect(Collectors.toSet());
+        Map<Long, Product> lockedProducts = productRepository.findAllByIdForUpdate(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
         for (CartItem cartItem : cartItems) {
-            Product product = cartItem.getProduct();
+            Product product = lockedProducts.get(cartItem.getProduct().getId());
+            if (product == null) {
+                throw new ResourceNotFoundException("Product not found: " + cartItem.getProduct().getId());
+            }
 
             if (product.getStockQuantity() < cartItem.getQuantity()) {
                 throw new InsufficientStockException(

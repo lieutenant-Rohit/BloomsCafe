@@ -42,3 +42,4 @@ frontend/node_modules/
 ### Build output ###
 frontend/dist/
 frontend/tsconfig.tsbuildinfo
+src/main/resources/static/

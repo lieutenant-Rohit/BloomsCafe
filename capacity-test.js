@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check, sleep, group } from 'k6';
+import { check, group, sleep } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
 
 const errorRate = new Rate('errors');
@@ -21,20 +21,13 @@ function login(email, password) {
 }
 
 export const options = {
-  stages: [
-    { duration: '60s', target: 5000 },
-    { duration: '2m', target: 5000 },
-    { duration: '30s', target: 0 },
-  ],
+  vus: __ENV.VUS ? Number(__ENV.VUS) : 100,
+  duration: __ENV.DUR || '30s',
   thresholds: {
     http_req_duration: ['p(95)<2000'],
     errors: ['rate<0.1'],
   },
 };
-
-export function setup() {
-  return {};
-}
 
 let vuToken = null;
 

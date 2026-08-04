@@ -50,6 +50,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/actuator/**").permitAll()
 
+                        .requestMatchers(request -> !request.getRequestURI().startsWith("/api/")).permitAll()
+
                         .anyRequest().authenticated()
                 )
 
